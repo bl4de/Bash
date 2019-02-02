@@ -1,0 +1,20 @@
+#!/bin/bash
+
+echo "[+] Looking for process $1 in ps list"
+
+PID=`ps a | grep $1 | grep -v grep | grep -v kill-process | cut -d" " -f 1`
+if [[ $PID -le 0 ]]; then
+    echo "[-] Process $1 not found in ps list"
+    exit 0
+fi
+
+echo "[+] PID of $1 found: $PID"
+echo
+kill -9 $PID
+if [[ $? -gt 0 ]]; then
+    echo "[-] Process $1 ($PID) was not killed. Check ps output to verify"
+    exit 0
+fi
+echo "[+] Process $1 ($PID) was killed successfuly"
+echo "[+] Done."
+
