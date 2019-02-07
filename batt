@@ -1,0 +1,14 @@
+#!/bin/bash
+# Battery checker for macOS
+
+clear
+echo -e "\n[+] BATTERY\n"
+battery_left=`pmset -g accps | grep Internal | cut -d")" -f 2` 
+cycles=`pmset -g rawbatt  | grep Cycles | cut -d";" -f 8 | cut -d"=" -f 2`
+
+echo "Power: $battery_left" | sed 's/^ //'
+echo "Cycles: $cycles"
+
+echo -e "\n[+] UPTIME\n"
+uptime
+echo 

@@ -34,4 +34,4 @@ fi
 cd /Applications/Chromium.app/Contents/MacOS
 echo "[+] running ./Chromium $port $xss_auditor $devtools"
 
-./Chromium $port $xss_auditor $devtools 
+./Chromium --ignore-certificate-errors $port $xss_auditor $devtools 
