@@ -1,0 +1,26 @@
+#!/bin/bash
+# Reverse hostname lookup with nslookup
+#
+ip=$1
+start=$2
+end=$3
+domain=$2
+
+echo "usage: ./reverse-lookup 10.10.10 1 10 [domain.com]"
+echo " Reverse DNS search for any domain.com host in 10.10.10.1 up to 10.10.10.10 IP range"
+echo
+
+echo "[+] starting DNS reverse lookup..."
+if [[ -z $ip ]]; then
+    echo "enter IP e.g. 10.10.10"
+    exit 0
+fi
+
+for ((i = $start; i< $end; i++ )); do
+    found_host=`nslookup -type=PTR $ip.$i | grep "name ="`
+    if [[ -n $domain ]]; then
+        echo $found_host | grep $domain
+    fi
+done
+
+echo "[+] done"
