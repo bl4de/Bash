@@ -9,11 +9,11 @@ url=$1      # base url to fuzz, e.g. http://company.com
 ext=$2     # extension e.g. php, asp rb etc. (no dot)
 
 echo -e "\n[+] wfuzz runner | fuzzing $1...:\n"
-wfuzz -c --filter "c=200" -w $STARTER $url/FUZZ
-wfuzz -c --filter "c=200" -w $LOWERCASE $url/FUZZ/
+wfuzz -f wfuzz.starter.out,raw -c --filter "c=200" -w $STARTER $url/FUZZ
+wfuzz -f wfuzz.lowercase.out,raw -c --filter "c=200" -w $LOWERCASE $url/FUZZ/
 
 if [[ -n $ext ]]; then
-   wfuzz -c --filter "c=200" -w $LOWERCASE $url/FUZZ.$ext 
+   wfuzz -f wfuzz.lowercase_ext.out,raw -c --filter "c=200" -w $LOWERCASE $url/FUZZ.$ext 
 fi
 
 echo -e "\n\n[+] DONE\n"
