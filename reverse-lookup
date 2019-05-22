@@ -15,7 +15,7 @@ fi
 
 # TODO: IP adres wyswietlanie w prawidlowym formacie
 for ((i = start; i<end; i++ )); do
-    found_host=$(nslookup -type=PTR "$ip.$i" | grep "name =")
+    found_host=$(nslookup -type=PTR "$ip.$i" | grep "name = ")
     if [[ -n $found_host ]]; then
         echo "$found_host"
     fi

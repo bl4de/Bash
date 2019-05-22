@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # reinstall local concrete
 
 REPO_PATH=/Library/WebServer/Documents/concrete5
@@ -14,7 +14,7 @@ rm -rf application/cache/*
 rm -rf application/files/*
 
 echo -e "[+] deleting database.php..."
-cd ../config
-rm -f dataabse.php
+cd $REPO_PATH/concrete/config
+rm -f database.php
 
 echo -e "\n[+] DONE"
