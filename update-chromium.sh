@@ -7,7 +7,7 @@ rm -rf ~/tmp/chromium_latest.zip
 wget https://download-chromium.appspot.com/dl/Mac?type=snapshots -O ~/tmp/chromium_latest.zip
 
 # unizp...
-unzip ~/tmp/chromium_latest.zip
+unzip ~/tmp/chromium_latest.zip -d ~/tmp/
 
 # ...remove current Chromium app from Apps...
 rm -rf /Applications/Chromium.app
