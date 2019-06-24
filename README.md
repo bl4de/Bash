@@ -1,2 +1,3 @@
 # Bash
-Misc Bash scripts
+
+Bash scripts
