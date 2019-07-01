@@ -12,7 +12,7 @@ do
     sublister -d $DOMAIN -o domains/$DOMAIN.sublister
     amass enum -brute -min-for-recursive 1 -d $DOMAIN -o domains/$DOMAIN.amass
     
-    if [ -s domains/$DOMAIN.sublister ] && [ -s domains/$DOMAIN.amass ]; then
+    if [ -s domains/$DOMAIN.sublister ] || [ -s domains/$DOMAIN.amass ]; then
         cat domains/$DOMAIN.* > domains/$DOMAIN.all
         sort -u -k 1 domains/$DOMAIN.all > domains/$DOMAIN
     fi
