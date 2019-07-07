@@ -2,6 +2,7 @@
 
 # list of domains - text file, one domain in single line
 DOMAINS=$1
+NMAP=$2
 
 if ! [ -d 'domains' ]; then
     mkdir domains
@@ -21,13 +22,18 @@ done
 
 # concatenate and sort all domains from the target
 cat domains/*.* > domains/domains.all
-sort -u -k 1 domains/domains.all > domains/domains.final
+sort -u -k 1 domains/domains.all > domains/__domains.final
 
 rm -f domains/domains.all
-echo -e "\n[+} DONE. Found $(wc -l domains/domains.final) unique subdomains"
+echo -e "\n[+} DONE. Found $(wc -l domains/__domains.final) unique subdomains"
 
 # run denumerator on the domains/domains.final output file
-denumerator -f domains/domains.final
+denumerator -f domains/__domains.final
+
+if [[ -n $NMAP ]]; then
+    # run nmap non-aggresive, "look around" scan with top 100 ports only, no servicediscovery, no scripts:
+    nmap -Pn --top-ports 100 -T2 -i domains/__domains.final -oN domains.nmap
+fi
 
 echo -e "\n[+} DONE."
 
