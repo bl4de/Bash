@@ -9,7 +9,7 @@ create_domains_folder() {
 
 ## perform sublist3r and amass enumeration on each domain passed as an argument
 enumerate_domain() {
-    DOMAIN=$1
+    local DOMAIN=$1
     
     sublister -d $DOMAIN -o domains/$DOMAIN.sublister
     amass enum -brute -min-for-recursive 1 -d $DOMAIN -o domains/$DOMAIN.amass
