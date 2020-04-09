@@ -33,14 +33,14 @@ create_list_of_domains() {
 
 ## runs denumerator
 run_denumerator() {
-    denumerator -f domains/__domains.final
+    denumerator -f domains/__domains.final -c 200,302,403,500
 }
 
 
 ## performs nmap scan
 run_nmap_scan() {
-    # run nmap non-aggresive, "look around" scan with top 100 ports only, no servicediscovery, no scripts:
-    nmap -Pn --top-ports 100 -T2 -i domains/__domains.final -oN domains.nmap
+    # run nmap non-aggresive, "look around" scan with top 1000 ports only
+    nmap -Pn -n --top-ports 1000 -T2 -sV -sC -i domains/__domains.final -oN domains.nmap
 }
 
 
