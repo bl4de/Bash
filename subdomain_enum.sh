@@ -70,7 +70,7 @@ DOMAINS=$1
 # IP address range
 CIDR=$2
 
-echo -e "$(date) subdomain_enum.sh started" >> subdomain_enum.log
+echo -e "$(date) subdomain_enum.sh started" > subdomain_enum.log
 
 # enusre that domains/ folder exists, if not create one
 create_domains_folder
