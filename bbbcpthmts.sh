@@ -4,6 +4,7 @@
 # collection of various wrappers, multi-commands, tips&tricks, shortcuts etc.
 # CTX: bl4de@wearehackerone.com
 
+# runs -p- against IP; then -sV -sC -A against every open port found
 full_nmap_scan() {
     echo -e "[+] Running full nmap scan against $1..."
     echo -e " -> search all open ports..."
@@ -13,6 +14,7 @@ full_nmap_scan() {
     echo -e "[+] Done!"
 }
 
+# runs Python 3 built-in HTTP server on [PORT]
 http_server() {
     echo -e "[+] Running Simple HTTP Server in current directory on port $1"
     python3 -m http.server $1
@@ -29,6 +31,10 @@ case "$cmd" in
     ;;
     
     *)
-        echo "Usage: $0 {cmd} {arg1} {arg2}...{argN}"
+        echo -e "Usage: $0 {cmd} {arg1} {arg2}...{argN}\n"
+        echo -e "Available commands:\n"
+        echo -e "\tfull_nmap_scan [IP]\t\t -> nmap -p- to enumerate ports + -sV -sC -A on found open ports"
+        echo -e "\thttp_server [PORT]\t\t -> runs HTTP server on [PORT] TCP port"
+        echo -e "\nHack The Planet!"
     ;;
 esac
