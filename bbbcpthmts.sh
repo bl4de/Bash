@@ -20,6 +20,13 @@ http_server() {
     python3 -m http.server $1
 }
 
+# runs john with rockyou.txt against hash type [FORMAT] and file [HASHES]
+rockyou_john() {
+    echo -e "[+] Running john with rockyou dictionary against $2 of type $1"
+    > /Users/bl4de/hacking/tools/jtr/run/john.pot
+    /Users/bl4de/hacking/tools/jtr/run/john --format=$1 --wordlist=/Users/bl4de/hacking/dictionaries/rockyou.txt $2
+    cat /Users/bl4de/hacking/tools/jtr/run/john.pot
+}
 
 cmd=$1
 case "$cmd" in
@@ -29,12 +36,15 @@ case "$cmd" in
     http_server)
         http_server $2
     ;;
-    
+    rockyou_john)
+        rockyou_john $2 $3
+    ;;
     *)
         echo -e "Usage: $0 {cmd} {arg1} {arg2}...{argN}\n"
         echo -e "Available commands:\n"
         echo -e "\tfull_nmap_scan [IP]\t\t -> nmap -p- to enumerate ports + -sV -sC -A on found open ports"
         echo -e "\thttp_server [PORT]\t\t -> runs HTTP server on [PORT] TCP port"
+        echo -e "\trockyou_john [TYPE] [HASHES]\t -> runs john+rockyou against [HASHES] file with hashes of type [TYPE]"
         echo -e "\nHack The Planet!"
     ;;
 esac
