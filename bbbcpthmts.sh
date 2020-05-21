@@ -22,9 +22,14 @@ http_server() {
 
 # runs john with rockyou.txt against hash type [FORMAT] and file [HASHES]
 rockyou_john() {
-    echo -e "[+] Running john with rockyou dictionary against $2 of type $1"
-    > /Users/bl4de/hacking/tools/jtr/run/john.pot
-    /Users/bl4de/hacking/tools/jtr/run/john --format=$1 --wordlist=/Users/bl4de/hacking/dictionaries/rockyou.txt $2
+    echo -e "[+] Running john with rockyou dictionary against $1 of type $2"
+    echo > /Users/bl4de/hacking/tools/jtr/run/john.pot
+    if [[ -n $2 ]]; then
+        format=$2
+        elif [[ -z $2 ]]; then
+        format=""
+    fi
+    /Users/bl4de/hacking/tools/jtr/run/john --wordlist=/Users/bl4de/hacking/dictionaries/rockyou.txt "$1" --format="$format"
     cat /Users/bl4de/hacking/tools/jtr/run/john.pot
 }
 
@@ -34,10 +39,10 @@ case "$cmd" in
         full_nmap_scan "$2"
     ;;
     http_server)
-        http_server $2
+        http_server "$2"
     ;;
     rockyou_john)
-        rockyou_john $2 $3
+        rockyou_john "$2" "$3"
     ;;
     *)
         echo -e "Usage: $0 {cmd} {arg1} {arg2}...{argN}\n"
