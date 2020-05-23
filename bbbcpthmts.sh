@@ -24,19 +24,19 @@ http_server() {
 # runs john with rockyou.txt against hash type [FORMAT] and file [HASHES]
 rockyou_john() {
     echo -e "[+] Running john with rockyou dictionary against $1 of type $2"
-    echo > /Users/bl4de/hacking/tools/jtr/run/john.pot
+    echo > "$HACKING_HOME"/tools/jtr/run/john.pot
     if [[ -n $2 ]]; then
-        /Users/bl4de/hacking/tools/jtr/run/john --wordlist=/Users/bl4de/hacking/dictionaries/rockyou.txt "$1" --format="$2"
+        "$HACKING_HOME"/tools/jtr/run/john --wordlist="$HACKING_HOME"/dictionaries/rockyou.txt "$1" --format="$2"
         elif [[ -z $2 ]]; then
-        /Users/bl4de/hacking/tools/jtr/run/john --wordlist=/Users/bl4de/hacking/dictionaries/rockyou.txt "$1"
+        "$HACKING_HOME"/tools/jtr/run/john --wordlist="$HACKING_HOME"/dictionaries/rockyou.txt "$1"
     fi
-    cat /Users/bl4de/hacking/tools/jtr/run/john.pot
+    cat "$HACKING_HOME"/tools/jtr/run/john.pot
 }
 
 # converts id_rsa to JTR format for cracking SSH key
 ssh_to_john() {
     echo -e "[+] Converting SSH id_rsa key to JTR format to crack it"
-    python /Users/bl4de/hacking/tools/jtr/run/sshng2john.py "$1" > "$1".hash
+    python "$HACKING_HOME"/tools/jtr/run/sshng2john.py "$1" > "$1".hash
     echo -e "[+] We have a hash.\n"
     echo -e "[+] Let's now crack it!"
     rockyou_john "$1".hash
@@ -54,6 +54,22 @@ npm_scan() {
     fi
     echo -e "\n\n[+]Done."
 }
+
+# exposes folder with Linux PrivEsc tools on localhost:9119
+privesc_tools_linux() {
+    cd "$HACKING_HOME"/tools/Linux-tools || exit
+    echo -e "[+] Starting HTTP server on port 9119..."
+    http_server 9119
+}
+
+
+# exposes folder with Windows PrivEsc tools on localhost:9119
+privesc_tools_linux() {
+    cd "$HACKING_HOME"/tools/Windows || exit
+    echo -e "[+] Starting HTTP server on port 9119..."
+    http_server 9119
+}
+
 
 
 cmd=$1
@@ -73,6 +89,12 @@ case "$cmd" in
     npm_scan)
         npm_scan "$2"
     ;;
+    privesc_tools_linux)
+        privesc_tools_linux
+    ;;
+    privesc_tools_windows)
+        privesc_tools_windows
+    ;;
     *)
         echo -e "Usage: $0 {cmd} {arg1} {arg2}...{argN}\n"
         echo -e "Available commands:\n"
@@ -80,6 +102,8 @@ case "$cmd" in
         echo -e "\tfull_nmap_scan [IP]\t\t -> nmap -p- to enumerate ports + -sV -sC -A on found open ports"
         echo -e "\n:: TOOLS ::"
         echo -e "\thttp_server [PORT]\t\t -> runs HTTP server on [PORT] TCP port"
+        echo -e "\tprivesc_tools_linux \t\t -> runs HTTP server on port 9119 in directory with Linux PrivEsc tools"
+        echo -e "\tprivesc_tools_windows \t\t -> runs HTTP server on port 9119 in directory with Windows PrivEsc tools"
         echo -e "\n:: PASSWORDS CRACKIN' ::"
         echo -e "\trockyou_john [TYPE] [HASHES]\t -> runs john+rockyou against [HASHES] file with hashes of type [TYPE]"
         echo -e "\tssh_to_john [ID_RSA]\t\t -> id_rsa to JTR SSH hash file for SSH key password cracking"
