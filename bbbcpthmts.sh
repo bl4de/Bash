@@ -5,13 +5,22 @@
 # CTX: bl4de@wearehackerone.com
 HACKING_HOME="/Users/bl4de/hacking"
 
+# config commands
+set_ip() {
+    export IP="$1"
+}
+
+
 # runs -p- against IP; then -sV -sC -A against every open port found
 full_nmap_scan() {
-    echo -e "[+] Running full nmap scan against $1..."
+    if [ -z "$IP" ]; then
+        IP=$1
+    fi
+    echo -e "[+] Running full nmap scan against $IP..."
     echo -e " -> search all open ports..."
-    ports=$(nmap -p- --min-rate=1000 "$1" | grep open | cut -d'/' -f 1 | tr '\n' ',')
+    ports=$(nmap -p- --min-rate=1000 "$IP" | grep open | cut -d'/' -f 1 | tr '\n' ',')
     echo -e " -> run version detection + nse scripts against $ports..."
-    nmap -p"$ports" -sV -sC -A -Pn -n "$1" -oN ./"$1".log
+    nmap -p"$ports" -sV -sC -A -Pn -n "$IP" -oN ./"$IP".log
     echo -e "[+] Done!"
 }
 
@@ -70,10 +79,32 @@ privesc_tools_linux() {
     http_server 9119
 }
 
+# enumerates SMB shares on [IP] - port 445 has to be open
+smb_enum() {
+    if [ -z "$IP" ]; then
+        IP=$1
+    fi
+    echo -e "[+] Enumerating SMB shares on $IP..."
+    nmap -p 445 --script=smb-enum-shares.nse,smb-enum-users.nse "$IP"
+    echo -e "\n[+] Done."
+}
 
+# if RPC on port 111 shows in rpcinfo that nfs on port 2049 is available
+# we can enumerate nfs shares available:
+nfs_enum() {
+    if [ -z "$IP" ]; then
+        IP=$1
+    fi
+    echo -e "[+] Enumerating nfs shares (TCP 2049) on $IP..."
+    nmap -p 111 --script=nfs-ls,nfs-statfs,nfs-showmount "$IP"
+    echo -e "\n[+] Done."
+}
 
 cmd=$1
 case "$cmd" in
+    set_ip)
+        set_ip "$2"
+    ;;
     full_nmap_scan)
         full_nmap_scan "$2"
     ;;
@@ -95,11 +126,22 @@ case "$cmd" in
     privesc_tools_windows)
         privesc_tools_windows
     ;;
+    smb_enum)
+        smb_enum "$2"
+    ;;
+    nfs_enum)
+        nfs_enum "$2"
+    ;;
     *)
-        echo -e "Usage: $0 {cmd} {arg1} {arg2}...{argN}\n"
-        echo -e "Available commands:\n"
-        echo -e ":: RECON ::"
+        echo -e "Usage:\t bbbcpthmts.sh {cmd} {arg1} {arg2}...{argN}"
+        echo -e "\t bbbcpthmts.sh -i {IP} (interactive mode)"  # interactive -> TBD
+        echo -e "\nAvailable commands:"
+        echo -e "\n:: COMMANDS IN FOR INTERACTIVE MODE ::"
+        echo -e "\tset_ip [IP]\t\t -> sets IP in current Bash session to use by other bbbcpthmts commands"
+        echo -e "\n:: RECON ::"
         echo -e "\tfull_nmap_scan [IP]\t\t -> nmap -p- to enumerate ports + -sV -sC -A on found open ports"
+        echo -e "\tsmb_enum [IP]\t\t -> enumerates SMB shares on [IP] (445 port has to be open)"
+        echo -e "\tnfs_enum [IP]\t\t -> enumerates nfs shares on [IP] (2049 port has to be open/listed in rpcinfo)"
         echo -e "\n:: TOOLS ::"
         echo -e "\thttp_server [PORT]\t\t -> runs HTTP server on [PORT] TCP port"
         echo -e "\tprivesc_tools_linux \t\t -> runs HTTP server on port 9119 in directory with Linux PrivEsc tools"
