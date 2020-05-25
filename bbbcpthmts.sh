@@ -4,6 +4,8 @@
 # collection of various wrappers, multi-commands, tips&tricks, shortcuts etc.
 # CTX: bl4de@wearehackerone.com
 HACKING_HOME="/Users/bl4de/hacking"
+RED='\033[0;41;30m'
+STD='\033[0;0;39m'
 
 # config commands
 set_ip() {
@@ -11,6 +13,8 @@ set_ip() {
 }
 
 interactive() {
+    clear
+    trap '' SIGINT SIGQUIT SIGTSTP
     set_ip "$1"
     local choice
     echo -e "--------------------------------------------------"
@@ -19,13 +23,16 @@ interactive() {
     echo -e "[1] -> run full nmap scan + -sV -sC on open port(s) "
     echo -e "[2] -> run SMB enumeration (if port 445 is open)"
     echo -e "[3] -> run nfs scan (port 2049 open)"
+    echo -e ""
+    echo -e "[0] -> Quit"
     echo -e "--------------------------------------------------"
     read -p "Select option: " choice
     case $choice in
         1) full_nmap_scan "$IP" ;;
         2) smb_enum "$IP" ;;
-        3) nfs_enum "$IP" 0;;
-        *) echo -e "${RED}Error...${STD}" && sleep 2
+        3) nfs_enum "$IP" ;;
+        0) exit ;;
+        *) interactive "$IP"
     esac
 }
 
