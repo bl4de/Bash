@@ -4,8 +4,8 @@
 # collection of various wrappers, multi-commands, tips&tricks, shortcuts etc.
 # CTX: bl4de@wearehackerone.com
 HACKING_HOME="/Users/bl4de/hacking"
-RED='\033[0;41;30m'
-STD='\033[0;0;39m'
+# RED='\033[0;41;30m'
+# STD='\033[0;0;39m'
 
 # config commands
 set_ip() {
@@ -38,11 +38,11 @@ interactive() {
 
 # runs -p- against IP; then -sV -sC -A against every open port found
 full_nmap_scan() {
-    echo -e "[+] Running full nmap scan against $IP..."
+    echo -e "[+] Running full nmap scan against $1..."
     echo -e " -> search all open ports..."
-    ports=$(nmap -p- --min-rate=1000 "$IP" | grep open | cut -d'/' -f 1 | tr '\n' ',')
+    ports=$(nmap -p- --min-rate=1000 "$1" | grep open | cut -d'/' -f 1 | tr '\n' ',')
     echo -e " -> run version detection + nse scripts against $ports..."
-    nmap -p"$ports" -sV -sC -A -Pn -n "$IP" -oN ./"$IP".log
+    nmap -p"$ports" -sV -sC -A -Pn -n "$1" -oN ./"$1".log
     echo -e "[+] Done!"
 }
 
@@ -103,16 +103,16 @@ privesc_tools_linux() {
 
 # enumerates SMB shares on [IP] - port 445 has to be open
 smb_enum() {
-    echo -e "[+] Enumerating SMB shares on $IP..."
-    nmap -p 445 --script=smb-enum-shares.nse,smb-enum-users.nse "$IP"
+    echo -e "[+] Enumerating SMB shares on $1..."
+    nmap -p 445 --script=smb-enum-shares.nse,smb-enum-users.nse "$1"
     echo -e "\n[+] Done."
 }
 
 # if RPC on port 111 shows in rpcinfo that nfs on port 2049 is available
 # we can enumerate nfs shares available:
 nfs_enum() {
-    echo -e "[+] Enumerating nfs shares (TCP 2049) on $IP..."
-    nmap -p 111 --script=nfs-ls,nfs-statfs,nfs-showmount "$IP"
+    echo -e "[+] Enumerating nfs shares (TCP 2049) on $1..."
+    nmap -p 111 --script=nfs-ls,nfs-statfs,nfs-showmount "$1"
     echo -e "\n[+] Done."
 }
 
