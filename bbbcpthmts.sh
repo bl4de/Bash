@@ -10,12 +10,27 @@ set_ip() {
     export IP="$1"
 }
 
+interactive() {
+    set_ip "$1"
+    local choice
+    echo -e "--------------------------------------------------"
+    echo -e "Interactive mode\tTarget: $IP"
+    echo -e "--------------------------------------------------"
+    echo -e "[1] -> run full nmap scan + -sV -sC on open port(s) "
+    echo -e "[2] -> run SMB enumeration (if port 445 is open)"
+    echo -e "[3] -> run nfs scan (port 2049 open)"
+    echo -e "--------------------------------------------------"
+    read -p "Select option: " choice
+    case $choice in
+        1) full_nmap_scan "$IP" ;;
+        2) smb_enum "$IP" ;;
+        3) nfs_enum "$IP" 0;;
+        *) echo -e "${RED}Error...${STD}" && sleep 2
+    esac
+}
 
 # runs -p- against IP; then -sV -sC -A against every open port found
 full_nmap_scan() {
-    if [ -z "$IP" ]; then
-        IP=$1
-    fi
     echo -e "[+] Running full nmap scan against $IP..."
     echo -e " -> search all open ports..."
     ports=$(nmap -p- --min-rate=1000 "$IP" | grep open | cut -d'/' -f 1 | tr '\n' ',')
@@ -81,9 +96,6 @@ privesc_tools_linux() {
 
 # enumerates SMB shares on [IP] - port 445 has to be open
 smb_enum() {
-    if [ -z "$IP" ]; then
-        IP=$1
-    fi
     echo -e "[+] Enumerating SMB shares on $IP..."
     nmap -p 445 --script=smb-enum-shares.nse,smb-enum-users.nse "$IP"
     echo -e "\n[+] Done."
@@ -92,9 +104,6 @@ smb_enum() {
 # if RPC on port 111 shows in rpcinfo that nfs on port 2049 is available
 # we can enumerate nfs shares available:
 nfs_enum() {
-    if [ -z "$IP" ]; then
-        IP=$1
-    fi
     echo -e "[+] Enumerating nfs shares (TCP 2049) on $IP..."
     nmap -p 111 --script=nfs-ls,nfs-statfs,nfs-showmount "$IP"
     echo -e "\n[+] Done."
@@ -132,9 +141,12 @@ case "$cmd" in
     nfs_enum)
         nfs_enum "$2"
     ;;
+    interactive)
+        interactive "$2"
+    ;;
     *)
         echo -e "Usage:\t bbbcpthmts.sh {cmd} {arg1} {arg2}...{argN}"
-        echo -e "\t bbbcpthmts.sh -i {IP} (interactive mode)"  # interactive -> TBD
+        echo -e "\t bbbcpthmts.sh interactive {IP} (interactive mode)"  # interactive -> TBD
         echo -e "\nAvailable commands:"
         echo -e "\n:: COMMANDS IN FOR INTERACTIVE MODE ::"
         echo -e "\tset_ip [IP]\t\t -> sets IP in current Bash session to use by other bbbcpthmts commands"
