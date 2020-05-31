@@ -38,7 +38,7 @@ create_list_of_domains() {
     cat domains/*.* > domains/domains.all
     sort -u -k 1 domains/domains.all > domains/__domains
     # remove odd <BR> left by Sublist3r or amass :P
-    sed 's/<BR>/#/g' __domains | tr '#' '\n' > __domains.final
+    sed 's/<BR>/#/g' domains/__domains | tr '#' '\n' > domains/__domains.final
     rm -f domains/domains.all
     echo -e "$(date) ... Done! $(cat domains/__domains.final|wc -l) unique domains gathered \o/" >> subdomain_enum.log
 }

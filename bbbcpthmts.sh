@@ -86,6 +86,15 @@ npm_scan() {
     echo -e "\n\n[+]Done."
 }
 
+
+# static code analysis of single JavaScript code
+javascript_sca() {
+    echo -e "[+] Starting static code analysis of $1 file with nodestructor and semgrep..."
+    nodestructor --include-browser-patterns --include-urls "$1"
+    semgrep --lang javascript --config "$HACKING_HOME"/tools/semgrep-rules/contrib/nodejsscan/ "$1"
+    echo -e "\n\n[+]Done."
+}
+
 # exposes folder with Linux PrivEsc tools on localhost:9119
 privesc_tools_linux() {
     cd "$HACKING_HOME"/tools/Linux-tools || exit
@@ -136,6 +145,9 @@ case "$cmd" in
     npm_scan)
         npm_scan "$2"
     ;;
+    javascript_sca)
+        javascript_sca "$2"
+    ;;
     privesc_tools_linux)
         privesc_tools_linux
     ;;
@@ -170,6 +182,7 @@ case "$cmd" in
         echo -e "\tssh_to_john [ID_RSA]\t\t -> id_rsa to JTR SSH hash file for SSH key password cracking"
         echo -e "\n:: STATIC CODE ANALYSIS ::"
         echo -e "\tnpm_scan [MODULE_NAME]\t\t -> static code analysis of MODULE_NAME npm module with nodestructor and semgrep"
+        echo -e "\tjavascript_sca [FILE_NAME]\t\t -> static code analysis of single JavaScript file with nodestructor and semgrep"
         echo -e "\nHack The Planet!"
     ;;
 esac
