@@ -1,8 +1,42 @@
 #!/bin/bash
 
-# bl4de's BugBounty/CTF/PenTest/Hacking multi-tool suite -> bbbcpthmts :D
+###          ###
+###  S0mbra  ###
+###          ###
+
+
+# BugBounty/CTF/PenTest/Hacking suite 
 # collection of various wrappers, multi-commands, tips&tricks, shortcuts etc.
 # CTX: bl4de@wearehackerone.com
+
+__logo="
+                      :PB@Bk:
+                  ,jB@@B@B@B@BBL.
+               7G@B@B@BMMMMMB@B@B@Nr
+           :kB@B@@@MMOMOMOMOMMMM@B@B@B1,
+       :5@B@B@B@BBMMOMOMOMOMOMOMM@@@B@B@BBu.
+    70@@@B@B@B@BXBBOMOMOMOMOMOMMBMPB@B@B@B@B@Nr
+  G@@@BJ iB@B@@  OBMOMOMOMOMOMOM@2  B@B@B. EB@B@S
+  @@BM@GJBU.  iSuB@OMOMOMOMOMOMM@OU1:  .kBLM@M@B@
+  B@MMB@B       7@BBMMOMOMOMOMOBB@:       B@BMM@B
+  @@@B@B         7@@@MMOMOMOMM@B@:         @@B@B@
+  @@OLB.          BNB@MMOMOMM@BEB          rBjM@B
+  @@  @           M  OBOMOMM@q  M          .@  @@
+  @@OvB           B:u@MMOMOMMBJiB          .BvM@B
+  @B@B@J         0@B@MMOMOMOMB@B@u         q@@@B@
+  B@MBB@v       G@@BMMMMMMMMMMMBB@5       F@BMM@B
+  @BBM@BPNi   LMEB@OMMMM@B@MMOMM@BZM7   rEqB@MBB@
+  B@@@BM  B@B@B  qBMOMB@B@B@BMOMBL  B@B@B  @B@B@M
+   J@@@@PB@B@B@B7G@OMBB.   ,@MMM@qLB@B@@@BqB@BBv
+      iGB@,i0@M@B@MMO@E  :  M@OMM@@@B@Pii@@N:
+         .   B@M@B@MMM@B@B@B@MMM@@@M@B
+             @B@B.i@MBB@B@B@@BM@::B@B@
+             B@@@ .B@B.:@B@ :B@B  @B@O
+               :0 r@B@  B@@ .@B@: P:
+                   vMB :@B@ :BO7
+                       ,B@B
+"
+
 HACKING_HOME="/Users/bl4de/hacking"
 # RED='\033[0;41;30m'
 # STD='\033[0;0;39m'
@@ -17,20 +51,25 @@ interactive() {
     trap '' SIGINT SIGQUIT SIGTSTP
     set_ip "$1"
     local choice
-    echo -e "--------------------------------------------------"
+    echo "$__logo"
+    echo -e "------------------------------------------------------------------"
+    echo -e "Bl4de's BugBounty/CTF/PenTest/Hacking multi-tool -> bbbcpthmts :D "
+    echo -e "------------------------------------------------------------------"
     echo -e "Interactive mode\tTarget: $IP"
-    echo -e "--------------------------------------------------"
+    echo -e "------------------------------------------------------------------"
     echo -e "[1] -> run full nmap scan + -sV -sC on open port(s) "
     echo -e "[2] -> run SMB enumeration (if port 445 is open)"
     echo -e "[3] -> run nfs scan (port 2049 open)"
+    echo -e "[4] -> run nikto against HTTP server on port 80 with default plugins"
     echo -e ""
     echo -e "[0] -> Quit"
-    echo -e "--------------------------------------------------"
+    echo -e "------------------------------------------------------------------"
     read -p "Select option: " choice
     case $choice in
         1) full_nmap_scan "$IP" ;;
         2) smb_enum "$IP" ;;
         3) nfs_enum "$IP" ;;
+        4) nikto -host "$IP" -Plugins tests ;;
         0) exit ;;
         *) interactive "$IP"
     esac
@@ -126,6 +165,7 @@ nfs_enum() {
 }
 
 cmd=$1
+echo "$__logo"
 case "$cmd" in
     set_ip)
         set_ip "$2"
@@ -164,15 +204,17 @@ case "$cmd" in
         interactive "$2"
     ;;
     *)
+        clear
+        echo -e "\nI'm guessing there's no chance we can take care of this quietly, is there? - S0mbra\n\n"
         echo -e "Usage:\t bbbcpthmts.sh {cmd} {arg1} {arg2}...{argN}"
         echo -e "\t bbbcpthmts.sh interactive {IP} (interactive mode)"  # interactive -> TBD
         echo -e "\nAvailable commands:"
         echo -e "\n:: COMMANDS IN FOR INTERACTIVE MODE ::"
-        echo -e "\tset_ip [IP]\t\t -> sets IP in current Bash session to use by other bbbcpthmts commands"
+        echo -e "\tset_ip [IP]\t\t\t -> sets IP in current Bash session to use by other bbbcpthmts commands"
         echo -e "\n:: RECON ::"
         echo -e "\tfull_nmap_scan [IP]\t\t -> nmap -p- to enumerate ports + -sV -sC -A on found open ports"
-        echo -e "\tsmb_enum [IP]\t\t -> enumerates SMB shares on [IP] (445 port has to be open)"
-        echo -e "\tnfs_enum [IP]\t\t -> enumerates nfs shares on [IP] (2049 port has to be open/listed in rpcinfo)"
+        echo -e "\tsmb_enum [IP]\t\t\t -> enumerates SMB shares on [IP] (445 port has to be open)"
+        echo -e "\tnfs_enum [IP]\t\t\t -> enumerates nfs shares on [IP] (2049 port has to be open/listed in rpcinfo)"
         echo -e "\n:: TOOLS ::"
         echo -e "\thttp_server [PORT]\t\t -> runs HTTP server on [PORT] TCP port"
         echo -e "\tprivesc_tools_linux \t\t -> runs HTTP server on port 9119 in directory with Linux PrivEsc tools"
@@ -182,7 +224,7 @@ case "$cmd" in
         echo -e "\tssh_to_john [ID_RSA]\t\t -> id_rsa to JTR SSH hash file for SSH key password cracking"
         echo -e "\n:: STATIC CODE ANALYSIS ::"
         echo -e "\tnpm_scan [MODULE_NAME]\t\t -> static code analysis of MODULE_NAME npm module with nodestructor and semgrep"
-        echo -e "\tjavascript_sca [FILE_NAME]\t\t -> static code analysis of single JavaScript file with nodestructor and semgrep"
+        echo -e "\tjavascript_sca [FILE_NAME]\t -> static code analysis of single JavaScript file with nodestructor and semgrep"
         echo -e "\nHack The Planet!"
     ;;
 esac
