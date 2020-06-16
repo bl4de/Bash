@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# shellcheck disable=SC1087
 ###          ###
 ###  S0mbra  ###
 ###          ###
@@ -8,6 +8,17 @@
 # BugBounty/CTF/PenTest/Hacking suite 
 # collection of various wrappers, multi-commands, tips&tricks, shortcuts etc.
 # CTX: bl4de@wearehackerone.com
+
+HACKING_HOME="/Users/bl4de/hacking"
+
+GREEN='\033[1;32m'
+GRAY='\033[1;30m'
+RED='\033[1;31m'
+YELLOW='\033[1;33m'
+BLUE='\033[1;34m'
+MAGENTA='\033[1;35m'
+
+CLR='\033[0m'
 
 __logo="
                       :PB@Bk:
@@ -37,9 +48,6 @@ __logo="
                        ,B@B
 "
 
-HACKING_HOME="/Users/bl4de/hacking"
-# RED='\033[0;41;30m'
-# STD='\033[0;0;39m'
 
 # config commands
 set_ip() {
@@ -52,7 +60,7 @@ interactive() {
     set_ip "$1"
     local choice
     echo "$__logo"
-    echo -e "------------------------------------------------------------------"
+    echo -e "$BLUE------------------------------------------------------------------"
     echo -e "Bl4de's BugBounty/CTF/PenTest/Hacking multi-tool -> bbbcpthmts :D "
     echo -e "------------------------------------------------------------------"
     echo -e "Interactive mode\tTarget: $IP"
@@ -63,8 +71,8 @@ interactive() {
     echo -e "[4] -> run nikto against HTTP server on port 80 with default plugins"
     echo -e ""
     echo -e "[0] -> Quit"
-    echo -e "------------------------------------------------------------------"
-    read -p "Select option: " choice
+    echo -e "------------------------------------------------------------------$CLR"
+    read -p "Select option:" choice
     case $choice in
         1) full_nmap_scan "$IP" ;;
         2) smb_enum "$IP" ;;
@@ -77,7 +85,7 @@ interactive() {
 
 # runs -p- against IP; then -sV -sC -A against every open port found
 full_nmap_scan() {
-    echo -e "[+] Running full nmap scan against $1..."
+    echo -e "$BLUE[+] Running full nmap scan against $1...$CLR"
     echo -e " -> search all open ports..."
     ports=$(nmap -p- --min-rate=1000 "$1" | grep open | cut -d'/' -f 1 | tr '\n' ',')
     echo -e " -> run version detection + nse scripts against $ports..."
@@ -87,13 +95,13 @@ full_nmap_scan() {
 
 # runs Python 3 built-in HTTP server on [PORT]
 http_server() {
-    echo -e "[+] Running Simple HTTP Server in current directory on port $1"
+    echo -e "$BLUE[+][+] Running Simple HTTP Server in current directory on port $1$CLR"
     python3 -m http.server "$1"
 }
 
 # runs john with rockyou.txt against hash type [FORMAT] and file [HASHES]
 rockyou_john() {
-    echo -e "[+] Running john with rockyou dictionary against $1 of type $2"
+    echo -e "$BLUE[+][+] Running john with rockyou dictionary against $1 of type $2$CLR"
     echo > "$HACKING_HOME"/tools/jtr/run/john.pot
     if [[ -n $2 ]]; then
         "$HACKING_HOME"/tools/jtr/run/john --wordlist="$HACKING_HOME"/dictionaries/rockyou.txt "$1" --format="$2"
@@ -105,17 +113,17 @@ rockyou_john() {
 
 # converts id_rsa to JTR format for cracking SSH key
 ssh_to_john() {
-    echo -e "[+] Converting SSH id_rsa key to JTR format to crack it"
+    echo -e "$BLUE[+][+] Converting SSH id_rsa key to JTR format to crack it$CLR"
     python "$HACKING_HOME"/tools/jtr/run/sshng2john.py "$1" > "$1".hash
-    echo -e "[+] We have a hash.\n"
-    echo -e "[+] Let's now crack it!"
+    echo -e "$BLUE[+][+] We have a hash.\n"
+    echo -e "$BLUE[+][+] Let's now crack it!"
     rockyou_john "$1".hash
 }
 
 # static code analysis of npm module installed in ~/node_modules
 # with nodestructor and semgrep
 npm_scan() {
-    echo -e "[+] Starting static code analysis of $1 module with nodestructor and semgrep..."
+    echo -e "$BLUE[+][+] Starting static code analysis of $1 module with nodestructor and semgrep...$CLR"
     nodestructor -r ~/node_modules/"$1" --verbose --skip-test-files
     semgrep --lang javascript --config "$HACKING_HOME"/tools/semgrep-rules/contrib/nodejsscan/ "$HOME"/node_modules/"$1"/*.js
     exitcode=$(ls "$HOME"/node_modules/"$1"/*/ >/dev/null 2>&1)
@@ -128,7 +136,7 @@ npm_scan() {
 
 # static code analysis of single JavaScript code
 javascript_sca() {
-    echo -e "[+] Starting static code analysis of $1 file with nodestructor and semgrep..."
+    echo -e "$BLUE[+][+] Starting static code analysis of $1 file with nodestructor and semgrep...$CLR"
     nodestructor --include-browser-patterns --include-urls "$1"
     semgrep --lang javascript --config "$HACKING_HOME"/tools/semgrep-rules/contrib/nodejsscan/ "$1"
     echo -e "\n\n[+]Done."
@@ -137,7 +145,7 @@ javascript_sca() {
 # exposes folder with Linux PrivEsc tools on localhost:9119
 privesc_tools_linux() {
     cd "$HACKING_HOME"/tools/Linux-tools || exit
-    echo -e "[+] Starting HTTP server on port 9119..."
+    echo -e "$BLUE[+][+] Starting HTTP server on port 9119...$CLR"
     http_server 9119
 }
 
@@ -145,13 +153,13 @@ privesc_tools_linux() {
 # exposes folder with Windows PrivEsc tools on localhost:9119
 privesc_tools_linux() {
     cd "$HACKING_HOME"/tools/Windows || exit
-    echo -e "[+] Starting HTTP server on port 9119..."
+    echo -e "$BLUE[+][+] Starting HTTP server on port 9119...$CLR"
     http_server 9119
 }
 
 # enumerates SMB shares on [IP] - port 445 has to be open
 smb_enum() {
-    echo -e "[+] Enumerating SMB shares on $1..."
+    echo -e "$BLUE[+][+] Enumerating SMB shares on $1...$CLR"
     nmap -p 445 --script=smb-enum-shares.nse,smb-enum-users.nse "$1"
     echo -e "\n[+] Done."
 }
@@ -159,8 +167,22 @@ smb_enum() {
 # if RPC on port 111 shows in rpcinfo that nfs on port 2049 is available
 # we can enumerate nfs shares available:
 nfs_enum() {
-    echo -e "[+] Enumerating nfs shares (TCP 2049) on $1..."
+    echo -e "$BLUE[+][+] Enumerating nfs shares (TCP 2049) on $1...$CLR"
     nmap -p 111 --script=nfs-ls,nfs-statfs,nfs-showmount "$1"
+    echo -e "\n[+] Done."
+}
+
+# checking AWS S3 bucket
+s3() {
+    clear
+    echo -e "$BLUE[+][+] Checking AWS S3 $1 bucket$CLR"
+    echo -e "\n- attempt to list content of the bucket...\n"
+    aws s3 ls "s3://$1"
+    if [[ "$?" == 0 ]]; then
+        echo -e "\n$GREEN+ content of the bucket can be listed!$CLR"
+    elif [[ "$?" != 0 ]]; then
+        echo -e "\n$RED- could not list the content... :/$CLR"
+    fi
     echo -e "\n[+] Done."
 }
 
@@ -200,31 +222,37 @@ case "$cmd" in
     nfs_enum)
         nfs_enum "$2"
     ;;
+    s3)
+        s3 "$2"
+    ;;
     interactive)
         interactive "$2"
     ;;
     *)
         clear
-        echo -e "\nI'm guessing there's no chance we can take care of this quietly, is there? - S0mbra\n\n"
-        echo -e "Usage:\t bbbcpthmts.sh {cmd} {arg1} {arg2}...{argN}"
-        echo -e "\t bbbcpthmts.sh interactive {IP} (interactive mode)"  # interactive -> TBD
+        echo -e "$GREEN\nI'm guessing there's no chance we can take care of this quietly, is there? - S0mbra$CLR"
+        echo -e "\n\n--------------------------------------------------------------------------------------------------------------"
+        echo -e "Usage:\t$YELLOW s0mbra.sh {cmd} {arg1} {arg2}...{argN}"
+        echo -e "\t s0mbra.sh interactive {IP} (interactive mode)$CLR"  # interactive -> TBD
         echo -e "\nAvailable commands:"
-        echo -e "\n:: COMMANDS IN FOR INTERACTIVE MODE ::"
+        echo -e "\n::$BLUE COMMANDS IN FOR INTERACTIVE MODE ::$CLR"
         echo -e "\tset_ip [IP]\t\t\t -> sets IP in current Bash session to use by other bbbcpthmts commands"
-        echo -e "\n:: RECON ::"
+        echo -e "\n::$BLUE RECON ::$CLR"
         echo -e "\tfull_nmap_scan [IP]\t\t -> nmap -p- to enumerate ports + -sV -sC -A on found open ports"
         echo -e "\tsmb_enum [IP]\t\t\t -> enumerates SMB shares on [IP] (445 port has to be open)"
         echo -e "\tnfs_enum [IP]\t\t\t -> enumerates nfs shares on [IP] (2049 port has to be open/listed in rpcinfo)"
-        echo -e "\n:: TOOLS ::"
+        echo -e "\ts3 [bucket]\t\t\t -> checks privileges on AWS S3 bucket (ls, cp, mv etc.)"
+        echo -e "\n::$BLUE TOOLS ::$CLR"
         echo -e "\thttp_server [PORT]\t\t -> runs HTTP server on [PORT] TCP port"
         echo -e "\tprivesc_tools_linux \t\t -> runs HTTP server on port 9119 in directory with Linux PrivEsc tools"
         echo -e "\tprivesc_tools_windows \t\t -> runs HTTP server on port 9119 in directory with Windows PrivEsc tools"
-        echo -e "\n:: PASSWORDS CRACKIN' ::"
+        echo -e "\n::$BLUE PASSWORDS CRACKIN' ::$CLR"
         echo -e "\trockyou_john [TYPE] [HASHES]\t -> runs john+rockyou against [HASHES] file with hashes of type [TYPE]"
         echo -e "\tssh_to_john [ID_RSA]\t\t -> id_rsa to JTR SSH hash file for SSH key password cracking"
-        echo -e "\n:: STATIC CODE ANALYSIS ::"
+        echo -e "\n::$BLUE STATIC CODE ANALYSIS ::$CLR"
         echo -e "\tnpm_scan [MODULE_NAME]\t\t -> static code analysis of MODULE_NAME npm module with nodestructor and semgrep"
         echo -e "\tjavascript_sca [FILE_NAME]\t -> static code analysis of single JavaScript file with nodestructor and semgrep"
-        echo -e "\nHack The Planet!"
+        echo -e "\n\n--------------------------------------------------------------------------------------------------------------"
+        echo -e "$GREEN\nHack The Planet!\n$CLR"
     ;;
 esac
