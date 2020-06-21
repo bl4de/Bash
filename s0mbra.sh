@@ -95,13 +95,13 @@ full_nmap_scan() {
 
 # runs Python 3 built-in HTTP server on [PORT]
 http_server() {
-    echo -e "$BLUE[+][+] Running Simple HTTP Server in current directory on port $1$CLR"
+    echo -e "$BLUE[+] Running Simple HTTP Server in current directory on port $1$CLR"
     python3 -m http.server "$1"
 }
 
 # runs john with rockyou.txt against hash type [FORMAT] and file [HASHES]
 rockyou_john() {
-    echo -e "$BLUE[+][+] Running john with rockyou dictionary against $1 of type $2$CLR"
+    echo -e "$BLUE[+] Running john with rockyou dictionary against $1 of type $2$CLR"
     echo > "$HACKING_HOME"/tools/jtr/run/john.pot
     if [[ -n $2 ]]; then
         "$HACKING_HOME"/tools/jtr/run/john --wordlist="$HACKING_HOME"/dictionaries/rockyou.txt "$1" --format="$2"
@@ -113,17 +113,17 @@ rockyou_john() {
 
 # converts id_rsa to JTR format for cracking SSH key
 ssh_to_john() {
-    echo -e "$BLUE[+][+] Converting SSH id_rsa key to JTR format to crack it$CLR"
+    echo -e "$BLUE[+] Converting SSH id_rsa key to JTR format to crack it$CLR"
     python "$HACKING_HOME"/tools/jtr/run/sshng2john.py "$1" > "$1".hash
-    echo -e "$BLUE[+][+] We have a hash.\n"
-    echo -e "$BLUE[+][+] Let's now crack it!"
+    echo -e "$BLUE[+] We have a hash.\n"
+    echo -e "$BLUE[+] Let's now crack it!"
     rockyou_john "$1".hash
 }
 
 # static code analysis of npm module installed in ~/node_modules
 # with nodestructor and semgrep
 npm_scan() {
-    echo -e "$BLUE[+][+] Starting static code analysis of $1 module with nodestructor and semgrep...$CLR"
+    echo -e "$BLUE[+] Starting static code analysis of $1 module with nodestructor and semgrep...$CLR"
     nodestructor -r ~/node_modules/"$1" --verbose --skip-test-files
     semgrep --lang javascript --config "$HACKING_HOME"/tools/semgrep-rules/contrib/nodejsscan/ "$HOME"/node_modules/"$1"/*.js
     exitcode=$(ls "$HOME"/node_modules/"$1"/*/ >/dev/null 2>&1)
@@ -136,7 +136,7 @@ npm_scan() {
 
 # static code analysis of single JavaScript code
 javascript_sca() {
-    echo -e "$BLUE[+][+] Starting static code analysis of $1 file with nodestructor and semgrep...$CLR"
+    echo -e "$BLUE[+] Starting static code analysis of $1 file with nodestructor and semgrep...$CLR"
     nodestructor --include-browser-patterns --include-urls "$1"
     semgrep --lang javascript --config "$HACKING_HOME"/tools/semgrep-rules/contrib/nodejsscan/ "$1"
     echo -e "\n\n[+]Done."
@@ -145,7 +145,7 @@ javascript_sca() {
 # exposes folder with Linux PrivEsc tools on localhost:9119
 privesc_tools_linux() {
     cd "$HACKING_HOME"/tools/Linux-tools || exit
-    echo -e "$BLUE[+][+] Starting HTTP server on port 9119...$CLR"
+    echo -e "$BLUE[+] Starting HTTP server on port 9119...$CLR"
     http_server 9119
 }
 
@@ -153,13 +153,13 @@ privesc_tools_linux() {
 # exposes folder with Windows PrivEsc tools on localhost:9119
 privesc_tools_linux() {
     cd "$HACKING_HOME"/tools/Windows || exit
-    echo -e "$BLUE[+][+] Starting HTTP server on port 9119...$CLR"
+    echo -e "$BLUE[+] Starting HTTP server on port 9119...$CLR"
     http_server 9119
 }
 
 # enumerates SMB shares on [IP] - port 445 has to be open
 smb_enum() {
-    echo -e "$BLUE[+][+] Enumerating SMB shares on $1...$CLR"
+    echo -e "$BLUE[+] Enumerating SMB shares on $1...$CLR"
     nmap -p 445 --script=smb-enum-shares.nse,smb-enum-users.nse "$1"
     echo -e "\n[+] Done."
 }
@@ -167,7 +167,7 @@ smb_enum() {
 # if RPC on port 111 shows in rpcinfo that nfs on port 2049 is available
 # we can enumerate nfs shares available:
 nfs_enum() {
-    echo -e "$BLUE[+][+] Enumerating nfs shares (TCP 2049) on $1...$CLR"
+    echo -e "$BLUE[+] Enumerating nfs shares (TCP 2049) on $1...$CLR"
     nmap -p 111 --script=nfs-ls,nfs-statfs,nfs-showmount "$1"
     echo -e "\n[+] Done."
 }
