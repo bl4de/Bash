@@ -151,7 +151,7 @@ privesc_tools_linux() {
 
 
 # exposes folder with Windows PrivEsc tools on localhost:9119
-privesc_tools_linux() {
+privesc_tools_windows() {
     cd "$HACKING_HOME"/tools/Windows || exit
     echo -e "$BLUE[+] Starting HTTP server on port 9119...$CLR"
     http_server 9119
