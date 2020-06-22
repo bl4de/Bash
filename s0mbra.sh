@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC1087
+# shellcheck disable=SC1087,SC2181,SC2162
 ###          ###
 ###  S0mbra  ###
 ###          ###
@@ -176,7 +176,7 @@ nfs_enum() {
 s3() {
     clear
     echo -e "$BLUE[+] Checking AWS S3 $1 bucket$CLR"
-    aws s3 ls "s3://$1" --no-sign-request
+    aws s3 ls "s3://$1" --no-sign-request 2> /dev/null
     if [[ "$?" == 0 ]]; then
         echo -e "\n$GREEN+ content of the bucket can be listed!$CLR"
     elif [[ "$?" != 0 ]]; then
@@ -185,7 +185,7 @@ s3() {
 
     touch test.txt
     echo 'TEST' >> test.txt
-    aws s3 cp test.txt "s3://$1/test.txt" --no-sign-request
+    aws s3 cp test.txt "s3://$1/test.txt" --no-sign-request 2> /dev/null
     if [[ "$?" == 0 ]]; then
         echo -e "\n$GREEN+ WOW!!! We can copy files to the bucket!!! PWNed!!!$CLR"
     elif [[ "$?" != 0 ]]; then
@@ -193,18 +193,23 @@ s3() {
     fi
     rm -f test.txt
 
-    aws s3api get-bucket-acl --bucket "$1" --no-sign-request
-    if [[ "$?" == 0 ]]; then
-        echo -e "\n$GREEN+  We can list ACL policies$CLR"
-    elif [[ "$?" != 0 ]]; then
-        echo -e "\n$RED- nope, ACL policies not readable... :/$CLR"
-    fi
 
-    aws s3api put-bucket-acl --bucket "$1" --grant-full-control emailaddress=deebiaan@gmail.com
+    declare -a s3api=("get-bucket-acl" "put-bucket-acl" "get-bucket-website")
+    for cmd in "${s3api[@]}"; do
+        aws s3api "$cmd" --bucket "$1" --no-sign-request 2> /dev/null
+        if [[ "$?" == 0 ]]; then
+            echo -e "\n$GREEN+  $cmd works!$CLR\n"
+            aws s3api "$cmd" --bucket "$1" --no-sign-request
+        elif [[ "$?" != 0 ]]; then
+            echo -e "\n$RED- nope, $cmd does not seem to be working... :/$CLR"
+        fi
+    done
+
+    aws s3api put-bucket-acl --bucket "$1" --grant-full-control emailaddress=deebiaan@gmail.com 2> /dev/null
     if [[ "$?" == 0 ]]; then
         echo -e "\n$GREEN+  We can grant full control!!! PWNed!!!$CLR"
     elif [[ "$?" != 0 ]]; then
-        echo -e "\n$RED- nope, can't grant control... :/$CLR"
+        echo -e "\n$RED- nope, can't grant control with --grant-full-control ... :/$CLR"
     fi
     echo -e "\n[+] Done."
 }
