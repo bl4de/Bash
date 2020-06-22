@@ -193,8 +193,18 @@ s3() {
     fi
     rm -f test.txt
 
-
-    declare -a s3api=("get-bucket-acl" "put-bucket-acl" "get-bucket-website")
+    declare -a s3api=(
+        "get-bucket-acl" 
+        "put-bucket-acl" 
+        "get-bucket-website" 
+        "get-bucket-cors"
+        "get-bucket-lifecycle-configuration" 
+        "get-bucket-policy" 
+        "list-bucket-metrics-configurations"
+        "list-multipart-uploads" 
+        "list-object-versions" 
+        "list-objects"
+    )
     for cmd in "${s3api[@]}"; do
         aws s3api "$cmd" --bucket "$1" --no-sign-request 2> /dev/null
         if [[ "$?" == 0 ]]; then
@@ -212,6 +222,25 @@ s3() {
         echo -e "\n$RED- nope, can't grant control with --grant-full-control ... :/$CLR"
     fi
     echo -e "\n[+] Done."
+}
+
+s3go() {
+    clear
+    echo -e "$BLUE[+] Getting $2 from $1 bucket...$CLR"
+
+    aws s3api get-object-acl --bucket "$1" --key "$2" 2> /dev/null
+    if [[ "$?" == 0 ]]; then
+        echo -e "\n$GREEN+ We can read ACL of $3$CLR"
+    elif [[ "$?" != 0 ]]; then
+        echo -e "\n$RED- can't check $2 ACL... :/$CLR"
+    fi
+
+    aws s3api get-object --bucket "$1" --key "$2" "$1".downloaded 2> /dev/null
+    if [[ "$?" == 0 ]]; then
+        echo -e "\n$GREEN+  $2 downloaded in current directory as $2.downloaded$CLR"
+    elif [[ "$?" != 0 ]]; then
+        echo -e "\n$RED- can't get $2 :/$CLR"
+    fi
 }
 
 cmd=$1
@@ -253,6 +282,9 @@ case "$cmd" in
     s3)
         s3 "$2"
     ;;
+    s3go)
+        s3go "$2" "$3"
+    ;;
     interactive)
         interactive "$2"
     ;;
@@ -274,6 +306,7 @@ case "$cmd" in
         echo -e "\thttp_server [PORT]\t\t -> runs HTTP server on [PORT] TCP port"
         echo -e "\tprivesc_tools_linux \t\t -> runs HTTP server on port 9119 in directory with Linux PrivEsc tools"
         echo -e "\tprivesc_tools_windows \t\t -> runs HTTP server on port 9119 in directory with Windows PrivEsc tools"
+        echo -e "\ts3go [bucket] [key]\t\t -> get object identified by [key] from AWS S3 [bucket]"
         echo -e "\n::$BLUE PASSWORDS CRACKIN' ::$CLR"
         echo -e "\trockyou_john [TYPE] [HASHES]\t -> runs john+rockyou against [HASHES] file with hashes of type [TYPE]"
         echo -e "\tssh_to_john [ID_RSA]\t\t -> id_rsa to JTR SSH hash file for SSH key password cracking"
