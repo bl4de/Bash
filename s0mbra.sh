@@ -198,7 +198,9 @@ smb_get_file() {
     fi
 
     echo -e "$BLUE[+] Downloading file $4 from $1...$CLR"
+    echo -e "$GREEN"
     smbmap -H "$1" -u "$2" -p "$3" --download "$4"
+    echo -e "$CLR"
     echo -e "\n[+] Done."
 }
 
@@ -334,7 +336,7 @@ case "$cmd" in
         smb_enum "$2" "$3" "$4"
     ;;
     smb_get_file)
-        smb_get_file "$2" "$3" "$4"
+        smb_get_file "$2" "$3" "$4" "$5"
     ;;
     smb_mount)
         smb_mount "$2" "$3" "$4"
@@ -375,7 +377,7 @@ case "$cmd" in
         echo -e "\tprivesc_tools_windows \t\t\t\t -> runs HTTP server on port 9119 in directory with Windows PrivEsc tools"
         echo -e "\n::$BLUE SMB SUITE ::$CLR"
         echo -e "\tsmb_enum [IP] [USER] [PASSWORD]\t\t\t -> enumerates SMB shares on [IP] as [USER] (eg. null) (445 port has to be open)"
-        echo -e "\tsmb_get_file [IP] [PATH] [user] [password]\t -> downloads file from SMB share [PATH] on [IP]"
+        echo -e "\tsmb_get_file [IP] [user] [password] [PATH] \t -> downloads file from SMB share [PATH] on [IP]"
         echo -e "\tsmb_mount [IP] [SHARE] [USER]\t\t\t -> mounts SMB share at ./mnt/shares"
         echo -e "\tsmb_umount\t\t\t\t\t -> unmounts SMB share from ./mnt/shares and deletes it"
         echo -e "\n::$BLUE PASSWORDS CRACKIN' ::$CLR"
