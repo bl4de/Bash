@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC1087,SC2181,SC2162
+# shellcheck disable=SC1087,SC2181,SC2162,SC2013
 ###          ###
 ###  S0mbra  ###
 ###          ###
@@ -85,9 +85,9 @@ interactive() {
 
 # runs -p- against IP; then -sV -sC -A against every open port found
 full_nmap_scan() {
-    echo -e "$BLUE[+] Running full nmap scan against $1...$CLR"
+    echo -e "$BLUE[+] Running full nmap scan against $1 ...$CLR"
     echo -e " -> search all open ports..."
-    ports=$(nmap -p- --min-rate=1000 "$1" | grep open | cut -d'/' -f 1 | tr '\n' ',')
+    ports=$(nmap -Pn -p- --min-rate=1000 "$1" | grep open | cut -d'/' -f 1 | tr '\n' ',')
     echo -e " -> run version detection + nse scripts against $ports..."
     nmap -p"$ports" -sV -sC -A -Pn -n "$1" -oN ./"$1".log
     echo -e "[+] Done!"
@@ -159,8 +159,65 @@ privesc_tools_windows() {
 
 # enumerates SMB shares on [IP] - port 445 has to be open
 smb_enum() {
-    echo -e "$BLUE[+] Enumerating SMB shares on $1...$CLR"
-    nmap -p 445 --script=smb-enum-shares.nse,smb-enum-users.nse "$1"
+    if [[ -z $2 ]]; then
+        username='NULL'
+    elif [[ -n $2 ]]; then
+        username="$2"
+    fi
+
+    if [[ -z $3 ]]; then
+        password=''
+    elif [[ -n $3 ]]; then
+        password="$3"
+    fi
+
+    echo -e "$BLUE[+] Enumerating SMB shares with nmap on $1...$CLR"
+    nmap -Pn -p445 --script=smb-enum-shares.nse,smb-enum-users.nse "$1"
+    echo -e "$YELLOW\n[+] smbmap -u $username -p $password against -> $1...$CLR"
+    smbmap -H "$1" -u "$username" -p "$password" 2>&1 | tee __disks
+    for d in $(grep 'READ' __disks | cut -d' ' -f 1); do
+        echo -e "$YELLOW\n[+] content of $d directory saved to $1__shares_listings $CLR"
+        smbmap -H "$IP" -u "$username" -p "$password" -R "$d" >> "$1"__shares_listings
+    done
+    rm -f __disks
+    echo -e "\n[+] Done."
+}
+
+# download file from SMB share
+smb_get_file() {
+    if [[ -z $2 ]]; then
+        username='NULL'
+    elif [[ -n $2 ]]; then
+        username="$2"
+    fi
+
+    if [[ -z $3 ]]; then
+        password=''
+    elif [[ -n $3 ]]; then
+        password="$3"
+    fi
+
+    echo -e "$BLUE[+] Downloading file $4 from $1...$CLR"
+    smbmap -H "$1" -u "$2" -p "$3" --download "$4"
+    echo -e "\n[+] Done."
+}
+
+# mounts SMB share at ./mnt/shares
+smb_mount() {
+    echo -e "$BLUE[+] Mounting SMB $2 share from $1 at ./mnt/shares...$CLR"
+    mkdir -p mnt/shares
+    echo "//$3@$1/$2"
+    mount_smbfs "//$3@$1/$2" ./mnt/shares
+    echo -e "$YELLOW\n[+] Locally available shares:\n.$CLR"
+    ls -l ./mnt/shares
+    echo -e "\n[+] Done."
+}
+
+# umounts from ./mnt/shares and delete it
+smb_umount() {
+    echo -e "$BLUE[+] Unmounting SMB share(s) from ./mnt/shares...$CLR"
+    umount ./mnt/shares
+    rm -rf ./mnt
     echo -e "\n[+] Done."
 }
 
@@ -168,13 +225,12 @@ smb_enum() {
 # we can enumerate nfs shares available:
 nfs_enum() {
     echo -e "$BLUE[+] Enumerating nfs shares (TCP 2049) on $1...$CLR"
-    nmap -p 111 --script=nfs-ls,nfs-statfs,nfs-showmount "$1"
+    nmap -Pn -p 111 --script=nfs-ls,nfs-statfs,nfs-showmount "$1"
     echo -e "\n[+] Done."
 }
 
 # checking AWS S3 bucket
 s3() {
-    clear
     echo -e "$BLUE[+] Checking AWS S3 $1 bucket$CLR"
     aws s3 ls "s3://$1" --no-sign-request 2> /dev/null
     if [[ "$?" == 0 ]]; then
@@ -244,6 +300,7 @@ s3go() {
 }
 
 cmd=$1
+clear
 echo "$__logo"
 case "$cmd" in
     set_ip)
@@ -274,7 +331,16 @@ case "$cmd" in
         privesc_tools_windows
     ;;
     smb_enum)
-        smb_enum "$2"
+        smb_enum "$2" "$3" "$4"
+    ;;
+    smb_get_file)
+        smb_get_file "$2" "$3" "$4"
+    ;;
+    smb_mount)
+        smb_mount "$2" "$3" "$4"
+    ;;
+    smb_umount)
+        smb_umount
     ;;
     nfs_enum)
         nfs_enum "$2"
@@ -299,7 +365,7 @@ case "$cmd" in
         echo -e "\tset_ip [IP]\t\t\t -> sets IP in current Bash session to use by other bbbcpthmts commands"
         echo -e "\n::$BLUE RECON ::$CLR"
         echo -e "\tfull_nmap_scan [IP]\t\t -> nmap -p- to enumerate ports + -sV -sC -A on found open ports"
-        echo -e "\tsmb_enum [IP]\t\t\t -> enumerates SMB shares on [IP] (445 port has to be open)"
+        echo -e "\tsmb_enum [IP] [USER] [PASSWORD]\t -> enumerates SMB shares on [IP] as [USER] (eg. null) (445 port has to be open)"
         echo -e "\tnfs_enum [IP]\t\t\t -> enumerates nfs shares on [IP] (2049 port has to be open/listed in rpcinfo)"
         echo -e "\ts3 [bucket]\t\t\t -> checks privileges on AWS S3 bucket (ls, cp, mv etc.)"
         echo -e "\n::$BLUE TOOLS ::$CLR"
@@ -307,6 +373,9 @@ case "$cmd" in
         echo -e "\tprivesc_tools_linux \t\t -> runs HTTP server on port 9119 in directory with Linux PrivEsc tools"
         echo -e "\tprivesc_tools_windows \t\t -> runs HTTP server on port 9119 in directory with Windows PrivEsc tools"
         echo -e "\ts3go [bucket] [key]\t\t -> get object identified by [key] from AWS S3 [bucket]"
+        echo -e "\tsmb_get_file [IP] [PATH] [user] [password] \n\t\t\t\t\t -> downloads file from SMB share [PATH] on [IP]"
+        echo -e "\tsmb_mount [IP] [SHARE] [USER]\t -> mounts SMB share at ./mnt/shares"
+        echo -e "\tsmb_umount\t\t\t -> unmounts SMB share from ./mnt/shares and deletes it"
         echo -e "\n::$BLUE PASSWORDS CRACKIN' ::$CLR"
         echo -e "\trockyou_john [TYPE] [HASHES]\t -> runs john+rockyou against [HASHES] file with hashes of type [TYPE]"
         echo -e "\tssh_to_john [ID_RSA]\t\t -> id_rsa to JTR SSH hash file for SSH key password cracking"
