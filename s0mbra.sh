@@ -356,7 +356,7 @@ case "$cmd" in
     ;;
     *)
         clear
-        echo -e "$GREEN\nI'm guessing there's no chance we can take care of this quietly, is there? - S0mbra$CLR"
+        echo -e "$GREEN I'm guessing there's no chance we can take care of this quietly, is there? - S0mbra$CLR"
         echo -e "\n\n--------------------------------------------------------------------------------------------------------------"
         echo -e "Usage:\t$YELLOW s0mbra.sh {cmd} {arg1} {arg2}...{argN}"
         echo -e "\t s0mbra.sh interactive {IP} (interactive mode)$CLR"  # interactive\t\t -> TBD
@@ -366,12 +366,13 @@ case "$cmd" in
         echo -e "\n::$BLUE RECON ::$CLR"
         echo -e "\tfull_nmap_scan [IP]\t\t\t\t -> nmap -p- to enumerate ports + -sV -sC -A on found open ports"
         echo -e "\tnfs_enum [IP]\t\t\t\t\t -> enumerates nfs shares on [IP] (2049 port has to be open/listed in rpcinfo)"
+        echo -e "\n::$BLUE AMAZON AWS S3 ::$CLR"
         echo -e "\ts3 [bucket]\t\t\t\t\t -> checks privileges on AWS S3 bucket (ls, cp, mv etc.)"
+        echo -e "\ts3go [bucket] [key]\t\t\t\t -> get object identified by [key] from AWS S3 [bucket]"
         echo -e "\n::$BLUE TOOLS ::$CLR"
         echo -e "\thttp_server [PORT]\t\t\t\t -> runs HTTP server on [PORT] TCP port"
         echo -e "\tprivesc_tools_linux \t\t\t\t -> runs HTTP server on port 9119 in directory with Linux PrivEsc tools"
         echo -e "\tprivesc_tools_windows \t\t\t\t -> runs HTTP server on port 9119 in directory with Windows PrivEsc tools"
-        echo -e "\ts3go [bucket] [key]\t\t\t\t -> get object identified by [key] from AWS S3 [bucket]"
         echo -e "\n::$BLUE SMB SUITE ::$CLR"
         echo -e "\tsmb_enum [IP] [USER] [PASSWORD]\t\t\t -> enumerates SMB shares on [IP] as [USER] (eg. null) (445 port has to be open)"
         echo -e "\tsmb_get_file [IP] [PATH] [user] [password]\t -> downloads file from SMB share [PATH] on [IP]"
