@@ -61,16 +61,16 @@ interactive() {
     local choice
     echo "$__logo"
     echo -e "$BLUE------------------------------------------------------------------"
-    echo -e "Bl4de's BugBounty/CTF/PenTest/Hacking multi-tool -> bbbcpthmts :D "
+    echo -e "Bl4de's BugBounty/CTF/PenTest/Hacking multi-tool\t\t -> bbbcpthmts :D "
     echo -e "------------------------------------------------------------------"
     echo -e "Interactive mode\tTarget: $IP"
     echo -e "------------------------------------------------------------------"
-    echo -e "[1] -> run full nmap scan + -sV -sC on open port(s) "
-    echo -e "[2] -> run SMB enumeration (if port 445 is open)"
-    echo -e "[3] -> run nfs scan (port 2049 open)"
-    echo -e "[4] -> run nikto against HTTP server on port 80 with default plugins"
+    echo -e "[1]\t\t -> run full nmap scan + -sV -sC on open port(s) "
+    echo -e "[2]\t\t -> run SMB enumeration (if port 445 is open)"
+    echo -e "[3]\t\t -> run nfs scan (port 2049 open)"
+    echo -e "[4]\t\t -> run nikto against HTTP server on port 80 with default plugins"
     echo -e ""
-    echo -e "[0] -> Quit"
+    echo -e "[0]\t\t -> Quit"
     echo -e "------------------------------------------------------------------$CLR"
     read -p "Select option:" choice
     case $choice in
@@ -86,9 +86,9 @@ interactive() {
 # runs -p- against IP; then -sV -sC -A against every open port found
 full_nmap_scan() {
     echo -e "$BLUE[+] Running full nmap scan against $1 ...$CLR"
-    echo -e " -> search all open ports..."
+    echo -e "\t\t -> search all open ports..."
     ports=$(nmap -Pn -p- --min-rate=1000 "$1" | grep open | cut -d'/' -f 1 | tr '\n' ',')
-    echo -e " -> run version detection + nse scripts against $ports..."
+    echo -e "\t\t -> run version detection + nse scripts against $ports..."
     nmap -p"$ports" -sV -sC -A -Pn -n "$1" -oN ./"$1".log
     echo -e "[+] Done!"
 }
@@ -173,7 +173,7 @@ smb_enum() {
 
     echo -e "$BLUE[+] Enumerating SMB shares with nmap on $1...$CLR"
     nmap -Pn -p445 --script=smb-enum-shares.nse,smb-enum-users.nse "$1"
-    echo -e "$YELLOW\n[+] smbmap -u $username -p $password against -> $1...$CLR"
+    echo -e "$YELLOW\n[+] smbmap -u $username -p $password against\t\t -> $1...$CLR"
     smbmap -H "$1" -u "$username" -p "$password" 2>&1 | tee __disks
     for d in $(grep 'READ' __disks | cut -d' ' -f 1); do
         echo -e "$YELLOW\n[+] content of $d directory saved to $1__shares_listings $CLR"
@@ -359,29 +359,30 @@ case "$cmd" in
         echo -e "$GREEN\nI'm guessing there's no chance we can take care of this quietly, is there? - S0mbra$CLR"
         echo -e "\n\n--------------------------------------------------------------------------------------------------------------"
         echo -e "Usage:\t$YELLOW s0mbra.sh {cmd} {arg1} {arg2}...{argN}"
-        echo -e "\t s0mbra.sh interactive {IP} (interactive mode)$CLR"  # interactive -> TBD
+        echo -e "\t s0mbra.sh interactive {IP} (interactive mode)$CLR"  # interactive\t\t -> TBD
         echo -e "\nAvailable commands:"
         echo -e "\n::$BLUE COMMANDS IN FOR INTERACTIVE MODE ::$CLR"
-        echo -e "\tset_ip [IP]\t\t\t -> sets IP in current Bash session to use by other bbbcpthmts commands"
+        echo -e "\tset_ip [IP]\t\t\t\t\t -> sets IP in current Bash session to use by other bbbcpthmts commands"
         echo -e "\n::$BLUE RECON ::$CLR"
-        echo -e "\tfull_nmap_scan [IP]\t\t -> nmap -p- to enumerate ports + -sV -sC -A on found open ports"
-        echo -e "\tsmb_enum [IP] [USER] [PASSWORD]\t -> enumerates SMB shares on [IP] as [USER] (eg. null) (445 port has to be open)"
-        echo -e "\tnfs_enum [IP]\t\t\t -> enumerates nfs shares on [IP] (2049 port has to be open/listed in rpcinfo)"
-        echo -e "\ts3 [bucket]\t\t\t -> checks privileges on AWS S3 bucket (ls, cp, mv etc.)"
+        echo -e "\tfull_nmap_scan [IP]\t\t\t\t -> nmap -p- to enumerate ports + -sV -sC -A on found open ports"
+        echo -e "\tnfs_enum [IP]\t\t\t\t\t -> enumerates nfs shares on [IP] (2049 port has to be open/listed in rpcinfo)"
+        echo -e "\ts3 [bucket]\t\t\t\t\t -> checks privileges on AWS S3 bucket (ls, cp, mv etc.)"
         echo -e "\n::$BLUE TOOLS ::$CLR"
-        echo -e "\thttp_server [PORT]\t\t -> runs HTTP server on [PORT] TCP port"
-        echo -e "\tprivesc_tools_linux \t\t -> runs HTTP server on port 9119 in directory with Linux PrivEsc tools"
-        echo -e "\tprivesc_tools_windows \t\t -> runs HTTP server on port 9119 in directory with Windows PrivEsc tools"
-        echo -e "\ts3go [bucket] [key]\t\t -> get object identified by [key] from AWS S3 [bucket]"
-        echo -e "\tsmb_get_file [IP] [PATH] [user] [password] \n\t\t\t\t\t -> downloads file from SMB share [PATH] on [IP]"
-        echo -e "\tsmb_mount [IP] [SHARE] [USER]\t -> mounts SMB share at ./mnt/shares"
-        echo -e "\tsmb_umount\t\t\t -> unmounts SMB share from ./mnt/shares and deletes it"
+        echo -e "\thttp_server [PORT]\t\t\t\t -> runs HTTP server on [PORT] TCP port"
+        echo -e "\tprivesc_tools_linux \t\t\t\t -> runs HTTP server on port 9119 in directory with Linux PrivEsc tools"
+        echo -e "\tprivesc_tools_windows \t\t\t\t -> runs HTTP server on port 9119 in directory with Windows PrivEsc tools"
+        echo -e "\ts3go [bucket] [key]\t\t\t\t -> get object identified by [key] from AWS S3 [bucket]"
+        echo -e "\n::$BLUE SMB SUITE ::$CLR"
+        echo -e "\tsmb_enum [IP] [USER] [PASSWORD]\t\t\t -> enumerates SMB shares on [IP] as [USER] (eg. null) (445 port has to be open)"
+        echo -e "\tsmb_get_file [IP] [PATH] [user] [password]\t -> downloads file from SMB share [PATH] on [IP]"
+        echo -e "\tsmb_mount [IP] [SHARE] [USER]\t\t\t -> mounts SMB share at ./mnt/shares"
+        echo -e "\tsmb_umount\t\t\t\t\t -> unmounts SMB share from ./mnt/shares and deletes it"
         echo -e "\n::$BLUE PASSWORDS CRACKIN' ::$CLR"
-        echo -e "\trockyou_john [TYPE] [HASHES]\t -> runs john+rockyou against [HASHES] file with hashes of type [TYPE]"
-        echo -e "\tssh_to_john [ID_RSA]\t\t -> id_rsa to JTR SSH hash file for SSH key password cracking"
+        echo -e "\trockyou_john [TYPE] [HASHES]\t\t\t -> runs john+rockyou against [HASHES] file with hashes of type [TYPE]"
+        echo -e "\tssh_to_john [ID_RSA]\t\t\t\t -> id_rsa to JTR SSH hash file for SSH key password cracking"
         echo -e "\n::$BLUE STATIC CODE ANALYSIS ::$CLR"
-        echo -e "\tnpm_scan [MODULE_NAME]\t\t -> static code analysis of MODULE_NAME npm module with nodestructor and semgrep"
-        echo -e "\tjavascript_sca [FILE_NAME]\t -> static code analysis of single JavaScript file with nodestructor and semgrep"
+        echo -e "\tnpm_scan [MODULE_NAME]\t\t\t\t -> static code analysis of MODULE_NAME npm module with nodestructor and semgrep"
+        echo -e "\tjavascript_sca [FILE_NAME]\t\t\t -> static code analysis of single JavaScript file with nodestructor and semgrep"
         echo -e "\n\n--------------------------------------------------------------------------------------------------------------"
         echo -e "$GREEN\nHack The Planet!\n$CLR"
     ;;
